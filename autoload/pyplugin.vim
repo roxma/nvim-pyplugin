@@ -12,8 +12,10 @@ func! pyplugin#start()
 endfunc
 
 func! s:on_exit()
-	echo 'pyplugin exit'
-	autocmd! pyplugin
+	echom 'pyplugin exit'
+	augroup pyplugin
+		autocmd! pyplugin
+	augroup end
 endfunc
 
 func! pyplugin#rpc_started(channel_id)
@@ -24,11 +26,12 @@ func! pyplugin#rpc_started(channel_id)
 
 		autocmd!
 
+		" TODO: 
 		" event bindings
 		autocmd BufLeave     * call s:on_event({'event': 'BufLeave'     , 'bufnr': bufnr('%')})
 		autocmd BufEnter     * call s:on_event({'event': 'BufEnter'     , 'bufnr': bufnr('%')})
-		" autocmd BufRead      * call s:on_event({'event': 'BufRead'      , 'bufnr': bufnr('%')})
-		" autocmd BufNewFile   * call s:on_event({'event': 'BufNewFile'   , 'bufnr': bufnr('%')})
+		autocmd BufRead      * call s:on_event({'event': 'BufRead'      , 'bufnr': bufnr('%')})
+		autocmd BufNewFile   * call s:on_event({'event': 'BufNewFile'   , 'bufnr': bufnr('%')})
 		" autocmd FileType     * call s:on_event({'event': 'FileType'     , 'bufnr': bufnr('%') , 'filetype': expand('<amatch>') })
 		" autocmd TextChangedI * call s:on_event({'event': 'TextChangedI' , 'bufnr': bufnr('%') , 'filetype':&filetype , 'changedtick':b:changedtick})
 		" ...
@@ -39,7 +42,7 @@ endfunc
 
 func! s:on_event(event)
 	try
-		call rpcnotify(s:channel , json_encode(a:event))
+		call rpcnotify(s:channel , 'event', a:event)
 	catch
 		" rpc send failed, the process may have exited and on_exit has not been called yet
 		return
